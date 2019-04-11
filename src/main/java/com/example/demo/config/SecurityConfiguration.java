@@ -11,36 +11,39 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+
+/**
+ * Description 作为web安全配置
+ * @author cf
+ *
+ */
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
 
+		
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
+	}
+	
+	
+	@Bean
+	@Override
+	protected UserDetailsService userDetailsService() {
+		InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+		manager.createUser(User.withUsername("admin").password(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("admin")).authorities("USER").build());
+		return manager;
+	}
+	
 	/**
-	   * 配置这个bean会在做AuthorizationServerConfigurer配置的时候使用
-	   * @return
-	   * @throws Exception
-	   */
-	  @Bean
-	  @Override
-	  public AuthenticationManager authenticationManagerBean() throws Exception {
-	    return super.authenticationManagerBean();
-	  }
-
-	  /**
-	   * 配置用户
-	   * 使用内存中的用户，实际项目中，一般使用的是数据库保存用户，具体的实现类可以使用JdbcDaoImpl或者JdbcUserDetailsManager
-	   * @return
-	   */
-	  @Bean
-	  @Override
-	  protected UserDetailsService userDetailsService() {
-	    InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-	    manager.createUser(User.withUsername("admin").password(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("admin")).authorities("USER").build());
-	    return manager;
-	  }
-
+	 * "/oauth/authorize"这个是需要WebSecurity做保护
+	 */
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
+		//WebSecurity安全规则
 		http.requestMatchers()
 		//WebSecurity过滤范围
         .antMatchers("/indexA","/login","/oauth/authorize")
